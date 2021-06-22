@@ -2,8 +2,6 @@
 To-do:
 - Formatovani
 - kopie tabulky
-- data ze TXT souboru
-- jmena hledat jen podle prijmeni, u duplicitnich vyresit posloupnost
 
 '''
 
@@ -12,9 +10,9 @@ import io
 import msoffcrypto
 from openpyxl import Workbook, load_workbook, workbook
 from openpyxl.utils import get_column_letter
-# from openpyxl.workbook.protection import WorkbookProtection
 from csv import reader
 from os import path
+from sys import argv
 
 
 # file = "Mzdové náklady-1-lock.xlsx"
@@ -55,44 +53,6 @@ def findMonth(month, width, depth=100):
     return False
 
 
-def findMoney(name,month,width):
-
-    col = findMonth(month,width)
-    row = findName(name)
-
-    if not col:
-        # print('Mesic '+month+' nenalezen')
-        return 0
-    elif not row:
-        # print('Jmeno '+name+' nenalezeno')
-        return 0
-    else:
-        return ws[col+str(row)].coordinate
-
-
-def findFood(name,month):
-
-    col = ord(findMonth(month))-63
-    row = findName(name)
-
-    if not col:
-        # print('Mesic '+month+' nenalezen')
-        return 0
-    elif not row:
-        # print('Jmeno '+name+' nenalezeno')
-        return 0
-    else:
-        return ws.cell(column=col, row=row).coordinate
-
-
-def findDup(name):
-    count = {}
-    # for name in data:
-    count.setdefault(name, 0)
-    count[name] = count[name] + 1
-    print(count)
-
-
 def formatTxt(names):
     lines = [i for i, s in enumerate(names) if '-------' in s]
 
@@ -118,136 +78,63 @@ def formatTxt(names):
         else:
             mzda = int(mzda)
 
-        # l = (jmeno, mzda)
-        # data.append(l)
         data.setdefault(jmeno,[])
         data[jmeno].append(mzda)
     return data
 
 
-# updateFile = 'C:/Users/bluem/Documents/Sandbox/python/automate_the_boring_stuff_with_python/excel/leden.csv'
-# updateFile = 'leden.csv'
-
-# with open(updateFile, 'r', encoding='windows-1250') as upd:
-#     month = path.basename(updateFile).split('.')[0]
-#     width = 6
-
-#     csv_reader = reader(upd)
-#     list_of_rows = list(map(tuple,csv_reader)) # Output: [('Martin', 1200), ('Jana',1500),...]
-
-updateFile = 'TEXT.TXT'
+# updateFile = 'TEXT.TXT'
 file = "Mzdové náklady 2021-clean.xlsx"
 wb = load_workbook(file)
+updateFile = argv[2]
 
 with open(updateFile,'r',encoding='windows-1250') as f:
     width = 6
-    month = 'unor'
+    month = str(argv[1])
+    print(month)
     names = f.readlines()
     data = formatTxt(names)
 
-    seznamStredisek = {}
+    seznamJmen = {}
 
     for worksheet in wb.worksheets:
         if worksheet.title not in ['Celkový součet', 'kontrola', 'List1']:
-            print()
             if worksheet.title in ['Úřad práce', 'Úřad práce Cheb', 'Katastrální úřad']:
                 width = 4
             else:
                 width = 6
             ws = wb[worksheet.title]
-            # print(worksheet.title.upper().center(60,'-'))
 
-            # ws = wb['Sklad Dalovice']
             mesic = findMonth(month,width)
 
-            for i in range(1,100):
+            for i in range(1,200):
                 bunka = ws.cell(row = i, column = 1)
-                # print(f'Bunka: {bunka.coordinate}')
                 cele_jmeno = bunka.value
-                # print(f'cele_jmeno: {cele_jmeno}')
                 if cele_jmeno == 'Zákonné pojištění' or cele_jmeno == 'Mzdové náklady': # Konec jmen
                     break
                 if cele_jmeno:
                     cele_jmeno = cele_jmeno.split(' ')
-                    # print(f'cele_jmeno[list]: {cele_jmeno}')
                     if len(cele_jmeno) > 1:
                         prijmeni = cele_jmeno[0]
-                        seznamStredisek.setdefault(worksheet.title,{})
-                        seznamStredisek[worksheet.title].setdefault(prijmeni,[])
-                        seznamStredisek[worksheet.title][prijmeni].append(mesic+str(bunka.row))
+                        seznamJmen.setdefault(prijmeni,{})
+                        seznamJmen[prijmeni].setdefault(worksheet.title,[])
+                        seznamJmen[prijmeni][worksheet.title].append(mesic+str(bunka.row))
 
-                        # seznamStredisek.setdefault(prijmeni,{})
-                        # seznamStredisek[prijmeni].setdefault(worksheet.title,[])
-                        # seznamStredisek[prijmeni][worksheet.title].append(mesic+str(bunka.row))
-                        # if prijmeni in data:
-                        #     print(f'{prijmeni} ma plat {data[prijmeni]}')
+    cols = (25,25,10)
+    for jmeno in seznamJmen:
+        counter = 0
+        if jmeno in data:
+            for k,v in seznamJmen[jmeno].items():
+                for bunka in v:
+                    if counter < len(data[jmeno]):
+                        print('+'+'-' * 65 + '+')
+                        print('| ' + str(jmeno).ljust(cols[0]) + '| ' + str(k).ljust(cols[1]) + '| ' + str(data[jmeno][counter]).ljust(cols[2]) + '|')
+                        ws = wb[k]
+                        ws[bunka].value = data[jmeno][counter]
+                        counter += 1
 
-    for stredisko,seznamJmen in seznamStredisek.items():
-        ws = wb[stredisko]
-        print()
-        print(stredisko)
-        for jmeno,bunka in seznamJmen.items():
-            # print(jmeno, bunka)
-            for i, v in enumerate(bunka):
-                # print(jmeno, v)
-                if jmeno in data:
-                    print(f'{jmeno}:{v}={data[jmeno][i]}')
-                    del data[jmeno][i]
-                    # ws[v].value = data[jmeno][i]
+    print('+'+'-' * 65 + '+')
+    print()
+    print('!!! NEZAPOMEN ZA SEBOU ZAMKNOUT !!!')
+wb.save(file)
 
-    # for k,v in data.items():
-    #     for m in v:
-    #         print(f'{k}={m}') # output Fiala=33258; k je jmeno, m je castka
-
-
-
-# wb.save(file)
-'''
-with open(updateFile, 'r', encoding='windows-1250') as f:
-    width = 6
-    month = 'leden'
-    names = f.readlines()
-    data = formatTxt(names)
-
-    for worksheet in wb.worksheets:
-        if worksheet.title not in ['Celkový součet', 'kontrola', 'List1']:
-            # print()
-            if worksheet.title in ['Úřad práce', 'Úřad práce Cheb', 'Katastrální úřad']:
-                width = 4
-                # stravenky = 0
-
-            print(worksheet.title.upper().center(60,'-'))
-            ws = wb[worksheet.title]
-
-            # for person in list_of_rows[:]: # Z listu se po kazdem obehu maze aktualizovana osoba
-            for person in data[:]: # Z listu se po kazdem obehu maze aktualizovana osoba
-                money = findMoney(person[0],month, width) # najde bunku
-                count = {}
-
-                if money:
-                    if person[1] == '': # Pokud neni vyplnena mzda, je delka tuple 1 a vznika Index error
-                        cash = '' # '0' a '' je v excelove tabulce jina hodnota kvuli automatickemu vypsani refundaci
-                        ws[money].value=cash
-                        # ws[money+2].value=straveky # pridat stravenky do csv
-                    else:
-                        cash = person[1]
-                        ws[money].value=int(cash)
-                    message = str('-- Update '+person[0] + ':')+str(cash).rjust(10)
-                    message = f'> Update | {person[0]} | {cash:>25}'
-                    print(message)
-                    data.remove(person)
-                # else:
-                #     print('-- Name '+person[0]+ ' not found')
-                #     continue
-    # if len(list_of_rows) > 0:
-    if len(data) > 0:
-        print('Nenalezeny tyto polozky:')
-        # for person in list_of_rows:
-        for person in data:
-            print(f'{person[0]}:{str(person[1])}')
-
-# wb.security.workbookPassword = 'abc'
-# print(WorkbookProtection.workbook_password)
-# wb.save(file)
-
-'''
