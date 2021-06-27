@@ -62,3 +62,44 @@ def rady(depth):
             pocetLidi += 1
 
     return pocetLidi
+
+
+def formatTxt(names):
+    lines = [i for i, s in enumerate(names) if '-------' in s]
+
+    s_lines = sorted(lines, reverse=True)
+
+    for index in s_lines:
+        if index == s_lines[-1]: # last element
+            del names[:lines[0]+1]
+        elif index == s_lines[0]: # first element
+            del names[lines[-1]:]
+        else:
+            del names[index-1:index+1]
+
+    data = {}
+    for name in names:
+
+        n = " ".join(name.split())
+        splited = n.split(' ')
+        mzda, jmeno = splited[-1].replace('.',''), splited[0]
+
+        if '/' in mzda:
+            mzda = 0
+        else:
+            mzda = int(mzda)
+
+        data.setdefault(jmeno,[])
+        data[jmeno].append(mzda)
+    return data
+
+
+def findMonth(ws, month, width, depth=100):
+    for column in range(2,depth,width):
+        m = strip_accents(ws.cell(column=column,row=1).value).lower()
+        if m == month:
+            return get_column_letter(column)
+            # return column
+    return False
+
+

@@ -1,4 +1,4 @@
-*.xlsx*
-TEXT.TXT
-*.csv
-
+*.xlsx
+*.TXT
+*.txt
+*.pyc
