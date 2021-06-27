@@ -8,39 +8,24 @@ To-do:
 import functions
 import io
 import msoffcrypto
+import os
+from shutil import copyfile
 from openpyxl import Workbook, load_workbook, workbook
 from openpyxl.utils import get_column_letter
 from csv import reader
-from os import path
 from sys import argv
 
 
-# file = "Mzdové náklady-1-lock.xlsx"
-# decrypted_wb = io.BytesIO()
+file = "Mzdové náklady 2021.xlsx"
+os.system('cp '+file+' temp.xlsx')
+decrypted_wb = io.BytesIO()
 
-# with open(file, 'rb') as f:
-#     officeFile = msoffcrypto.OfficeFile(f)
-#     officeFile.load_key(password='13881744')
-#     officeFile.decrypt(decrypted_wb)
+with open(file, 'rb') as f:
+    officeFile = msoffcrypto.OfficeFile(f)
+    officeFile.load_key(password='13881744')
+    officeFile.decrypt(decrypted_wb)
 
-# wb = load_workbook(filename=decrypted_wb)
-
-
-
-# Vyhleda zadane jmeno v prnim sloupci
-def findName(name, depth=100):
-    # print(name)
-    for row in range(3,depth):
-        bunka = ws.cell(column=1, row=row).value
-        # print(bunka)
-        if bunka is None:
-            # print('Run motherfucker')
-            continue
-        else:
-            # if ws.cell(column=1, row=row).value == name:
-            if name in ws.cell(column=1, row=row).value:
-                return row
-    return False
+wb = load_workbook(filename=decrypted_wb)
 
 
 # Vyhleda mesic v prvnim radku s defaultni hloubkou depth=100
@@ -74,7 +59,7 @@ def formatTxt(names):
         mzda, jmeno = splited[-1].replace('.',''), splited[0]
 
         if '/' in mzda:
-            mzda = ''
+            mzda = 0
         else:
             mzda = int(mzda)
 
@@ -84,8 +69,8 @@ def formatTxt(names):
 
 
 # updateFile = 'TEXT.TXT'
-file = "Mzdové náklady 2021-clean.xlsx"
-wb = load_workbook(file)
+# file = "Mzdové náklady 2021-clean.xlsx"
+# wb = load_workbook(file)
 updateFile = argv[2]
 
 with open(updateFile,'r',encoding='windows-1250') as f:
