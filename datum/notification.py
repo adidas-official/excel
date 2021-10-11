@@ -32,6 +32,7 @@ message = MIMEMultipart('alternative')
 message['Subject'] = 'kontrola terminu'
 message['From'] = sender
 message['To'] = reciever
+
 body = ''
 
 for i in range(3,55):
