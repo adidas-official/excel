@@ -7,6 +7,7 @@ from time import process_time
 t0 = process_time()
 
 import functions, msoffcrypto
+from win32com.client import Dispatch
 from os import system
 from io import BytesIO
 from shutil import copyfile
@@ -14,11 +15,9 @@ from openpyxl import Workbook, load_workbook, workbook
 from openpyxl.utils import get_column_letter
 from sys import argv
 
-
 month = argv[1]
 updateFile = argv[2]
 
-file = "mzdové náklady bereko 2021.xlsx"
 tempFile = 'temp.xlsx'
 copyfile(file,tempFile)
 
