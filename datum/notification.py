@@ -1,8 +1,6 @@
 #! C:\Users\bluem\Documents\Sandbox\python\venvs\automation\Scripts\python.exe
 '''
 To-do:
-poslat email,
-autostart windows - taskschd.exe
 '''
 
 from openpyxl import Workbook, load_workbook, workbook
@@ -10,10 +8,18 @@ from openpyxl.utils import get_column_letter
 from datetime import date, timedelta
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import subprocess
+from pathlib import Path
 import smtplib, ssl
 
-file = 'C:/Users/bluem/Documents/Sandbox/python/automate_the_boring_stuff_with_python/excel/datum/datum.xlsx'
-log_file = 'C:/Users/bluem/Documents/Sandbox/python/automate_the_boring_stuff_with_python/excel/datum/notif.txt'
+
+x = Path(r'X:')
+
+if not x.exists():
+    subprocess.call(r'net use X: \\server1\admin /user:Administrator Server1', shell=True)
+
+# file = 'C:/Users/bluem/Documents/Sandbox/python/automate_the_boring_stuff_with_python/excel/datum/datum.xlsx'
+file = 'X:/Documents/datum.xlsx'
 wb = load_workbook(file, data_only = True)
 
 col_prohlidka = ord('D') - 64
@@ -35,7 +41,7 @@ message['To'] = reciever
 
 body = ''
 
-for i in range(3,55):
+for i in range(3,100):
     platnost_prohlidka = (ws.cell(row=i,column=col_prohlidka).value, col_prohlidka, 'zdr. prohlidka:')
     platnost_bozp = (ws.cell(row=i,column=col_bozp).value, col_bozp, 'bozp:')
     platnost = [platnost_prohlidka, platnost_bozp]
@@ -54,15 +60,16 @@ for i in range(3,55):
                     body += report
 
 
-# print(body)
-message.attach(MIMEText(body,'html'))
+print(body)
+if body != '':
+    message.attach(MIMEText(body,'html'))
 
-# Create a secure SSL context
-context = ssl.create_default_context()
+    # Create a secure SSL context
+    context = ssl.create_default_context()
 
-with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
-    server.login(sender, password)
-    server.sendmail(sender, reciever, message.as_string())
+    with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
+        server.login(sender, password)
+        server.sendmail(sender, reciever, message.as_string())
 
 
 
