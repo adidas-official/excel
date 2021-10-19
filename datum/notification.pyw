@@ -1,6 +1,6 @@
-#! C:\Users\bluem\Documents\Sandbox\python\venvs\automation\Scripts\python.exe
+#! C:\Users\bluem\Documents\Sandbox\python\venvs\automation\Scripts\pythonw.exe
 '''
-To-do:
+TOOD:
 '''
 
 from openpyxl import Workbook, load_workbook, workbook
@@ -19,7 +19,7 @@ if not x.exists():
     subprocess.call(r'net use X: \\server1\admin /user:Administrator Server1', shell=True)
 
 # file = 'C:/Users/bluem/Documents/Sandbox/python/automate_the_boring_stuff_with_python/excel/datum/datum.xlsx'
-file = 'X:/Documents/datum.xlsx'
+file = 'X:/Documents/datum.xlsx' # zmenit v praci
 wb = load_workbook(file, data_only = True)
 
 col_prohlidka = ord('D') - 64
@@ -29,8 +29,8 @@ today = date.today()
 
 ws = wb['Sheet1']
 
-sender = 'pyzdenek@gmail.com'
-reciever = 'habahaba0123@gmail.com'
+sender = 'pyzdenek@gmail.com' # zalozit novy pro Fialu
+reciever = 'habahaba0123@gmail.com' # poslat ucetnimu nebo Fandovi
 password = 'Ma9G9#JZ'
 port = 465
 
@@ -60,7 +60,6 @@ for i in range(3,100):
                     body += report
 
 
-print(body)
 if body != '':
     message.attach(MIMEText(body,'html'))
 
