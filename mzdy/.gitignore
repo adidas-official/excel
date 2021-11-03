@@ -2,3 +2,4 @@
 *.TXT
 *.txt
 *.pyc
+*~lock.*
