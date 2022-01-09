@@ -1,26 +1,24 @@
-'''
-To-do:
-
-'''
-
+from io import BytesIO
+from os import system
+from shutil import copyfile
+from sys import argv
 from time import process_time
+from openpyxl import load_workbook
+
+import functions
+import msoffcrypto
+
 t0 = process_time()
 
-import functions, msoffcrypto
-from os import system
-from io import BytesIO
-from shutil import copyfile
-from openpyxl import Workbook, load_workbook, workbook
-from openpyxl.utils import get_column_letter
-from sys import argv
+# month = argv[1]
+# updateFile = argv[2]
 
-
-month = argv[1]
-updateFile = argv[2]
+month = input('Mesic: ')
+updateFile = 'TEXT.TXT'
 
 file = "Mzdové náklady 2021.xlsx"
 tempFile = 'temp.xlsx'
-copyfile(file,tempFile)
+copyfile(file, tempFile)
 
 try:
     decrypted_wb = BytesIO()
@@ -34,7 +32,7 @@ except UnboundLocalError:
     wb = load_workbook(tempFile)
 
 
-with open(updateFile,'r',encoding='windows-1250') as f:
+with open(updateFile, 'r', encoding='windows-1250') as f:
     names = f.readlines()
     data = functions.formatTxt(names)
 
@@ -51,24 +49,24 @@ for worksheet in wb.worksheets:
 
         mesic = functions.findMonth(ws, month,width)
 
-        for i in range(1,200):
-            bunka = ws.cell(row = i, column = 1)
+        for i in range(1, 200):
+            bunka = ws.cell(row=i, column=1)
             cele_jmeno = bunka.value
-            if cele_jmeno == 'Zákonné pojištění' or cele_jmeno == 'Mzdové náklady': # Konec jmen
+            if cele_jmeno == 'Zákonné pojištění' or cele_jmeno == 'Mzdové náklady':  # Konec jmen
                 break
             if cele_jmeno:
                 cele_jmeno = cele_jmeno.split(' ')
                 if len(cele_jmeno) > 1:
                     prijmeni = cele_jmeno[0]
-                    seznamJmen.setdefault(prijmeni,{})
-                    seznamJmen[prijmeni].setdefault(worksheet.title,[])
+                    seznamJmen.setdefault(prijmeni, {})
+                    seznamJmen[prijmeni].setdefault(worksheet.title, [])
                     seznamJmen[prijmeni][worksheet.title].append(mesic+str(bunka.row))
 
-cols = (25,25,10)
+cols = (25, 25, 10)
 for jmeno in seznamJmen:
     counter = 0
     if jmeno in data:
-        for k,v in seznamJmen[jmeno].items():
+        for k, v in seznamJmen[jmeno].items():
             for bunka in v:
                 if counter < len(data[jmeno]):
                     print('+'+'-' * 65 + '+')
